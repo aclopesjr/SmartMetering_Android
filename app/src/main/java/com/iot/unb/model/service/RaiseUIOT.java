@@ -1,16 +1,18 @@
 package com.iot.unb.model.service;
 
-import android.app.Application;
-import android.net.Uri;
-import android.provider.Settings;
-
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.iot.unb.SmartMetering.MainActivity;
+import com.iot.unb.model.domain.register.AutoRegister;
+import com.iot.unb.model.domain.result.AutoRegisterResult;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by aclopesjr on 5/7/17.
@@ -39,24 +41,43 @@ public class RaiseUIOT {
     /**
      * Auto register the device.
      */
-    public void autoRegister() {
+    public void autoRegister(final Raise.Listener<AutoRegisterResult> successListener, final Raise.ErrorListener errorListener) {
 
         RequestQueue request = Volley.newRequestQueue(MainActivity.getContext());
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 UIOT_HOST.concat("/").concat(CLIENT_REGISTER),
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-
+                        AutoRegisterResult result = new Gson().fromJson(response, AutoRegisterResult.class);
+                        successListener.onSucces(result);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        errorListener.onError(error);
                     }
-                });
+                })
+        {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    AutoRegister jsonData = new AutoRegister();
+                    String json = new Gson().toJson(jsonData);
+                    return json.getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+
         request.add(stringRequest);
     }
 
