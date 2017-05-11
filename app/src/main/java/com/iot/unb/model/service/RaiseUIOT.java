@@ -8,6 +8,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.iot.unb.SmartMetering.MainActivity;
 import com.iot.unb.model.domain.register.AutoRegister;
 import com.iot.unb.model.domain.result.AutoRegisterResult;
@@ -41,7 +42,7 @@ public class RaiseUIOT {
     /**
      * Auto register the device.
      */
-    public void autoRegister(final Raise.Listener<AutoRegisterResult> successListener, final Raise.ErrorListener errorListener) {
+    public static void autoRegister(final Raise.Listener<AutoRegisterResult> successListener, final Raise.ErrorListener errorListener) {
 
         RequestQueue request = Volley.newRequestQueue(MainActivity.getContext());
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
@@ -68,8 +69,18 @@ public class RaiseUIOT {
             @Override
             public byte[] getBody() throws AuthFailureError {
                 try {
+                    //Creates instance of AutoRegister
                     AutoRegister jsonData = new AutoRegister();
-                    String json = new Gson().toJson(jsonData);
+
+                    //Serializes the AutoRegister object to json.
+                    String json = new GsonBuilder()
+                            .setPrettyPrinting()
+                            .create()
+                            .toJson(jsonData);
+
+                    //Prints the json
+                    System.out.print(json);
+
                     return json.getBytes("utf-8");
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();

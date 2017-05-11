@@ -101,11 +101,14 @@ public class AutoRegister {
     public AutoRegister() {
         super();
         setName("name of device");
-        setChannel("model");
-        setSerial("serial");
+        setChipset("AMD 790FX");
+        setMac("5c:96:9d:77:9e:59");
+        setSerial("C02JM60EDTY3");
         setProcessor("processor");
-        setMac("mac address");
-        setChannel("unkown");
+        setChannel("Ethernet");
+
+        Long timeStamp = System.currentTimeMillis()/1000;
+        setClient_time(timeStamp.toString());
 
         List<String> tags = new ArrayList<String>();
         tags.add("Android");
