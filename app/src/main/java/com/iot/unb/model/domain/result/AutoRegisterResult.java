@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class AutoRegisterResult {
 
+    public static final String fileName = "auto_register.json";
+
     @SerializedName("tokenId")
     private String tokenId;
 

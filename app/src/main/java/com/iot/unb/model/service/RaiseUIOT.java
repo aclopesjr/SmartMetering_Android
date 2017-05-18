@@ -1,5 +1,7 @@
 package com.iot.unb.model.service;
 
+import android.util.Log;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -11,7 +13,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.iot.unb.SmartMetering.MainActivity;
 import com.iot.unb.model.domain.register.AutoRegister;
+import com.iot.unb.model.domain.register.DataRegister;
+import com.iot.unb.model.domain.register.Service;
+import com.iot.unb.model.domain.register.ServiceRegister;
 import com.iot.unb.model.domain.result.AutoRegisterResult;
+import com.iot.unb.model.domain.result.ServiceRegisterResult;
 
 import java.io.UnsupportedEncodingException;
 
@@ -50,7 +56,14 @@ public class RaiseUIOT {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.d("Smart Metering", response);
+
                         AutoRegisterResult result = new Gson().fromJson(response, AutoRegisterResult.class);
+                        //Saves the result as file
+                        if (Storage.persist(result, AutoRegisterResult.fileName)) {
+                            Log.d("Smart Metering", result.getTokenId());
+                        }
+                        //Returns
                         successListener.onSucces(result);
                     }
                 },
@@ -79,7 +92,7 @@ public class RaiseUIOT {
                             .toJson(jsonData);
 
                     //Prints the json
-                    System.out.print(json);
+                    Log.d("Smart Metering", json);
 
                     return json.getBytes("utf-8");
                 } catch (UnsupportedEncodingException e) {
@@ -95,7 +108,7 @@ public class RaiseUIOT {
     /**
      * Revalidates the auto register.
      */
-    public void revalidateAutoRegister() {
+    public static void revalidateAutoRegister() {
 
         RequestQueue request = Volley.newRequestQueue(MainActivity.getContext());
 
@@ -113,6 +126,113 @@ public class RaiseUIOT {
 
                     }
                 });
+        request.add(stringRequest);
+    }
+
+    public static void registerAllServices(final Raise.Listener<ServiceRegisterResult> successListener, final Raise.ErrorListener errorListener) {
+        RequestQueue request = Volley.newRequestQueue(MainActivity.getContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                UIOT_HOST.concat("/").concat(SERVICE_REGISTER),
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Smart Metering", response);
+
+                        ServiceRegisterResult result = new Gson().fromJson(response, ServiceRegisterResult.class);
+                        //Saves the result as file
+                        if (Storage.persist(result, ServiceRegisterResult.fileName)) {
+                            Log.d("Smart Metering", result.getTokenId());
+                        }
+                        //Returns
+                        successListener.onSucces(result);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        errorListener.onError(error);
+                    }
+                })
+        {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    //Creates instance of AutoRegister
+                    ServiceRegister jsonData = ServiceRegisterAux.servicesWithRoot();
+
+                    //Serializes the AutoRegister object to json.
+                    String json = new GsonBuilder()
+                            .setPrettyPrinting()
+                            .create()
+                            .toJson(jsonData);
+
+                    //Prints the json
+                    Log.d("Smart Metering", json);
+
+                    return json.getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+
+        request.add(stringRequest);
+    }
+
+    public static void collectDataForAllServices(final Raise.Listener<String> successListener, final Raise.ErrorListener errorListener) {
+        RequestQueue request = Volley.newRequestQueue(MainActivity.getContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                UIOT_HOST.concat("/").concat(SERVICE_REGISTER),
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Smart Metering", response);
+
+                        //Returns
+                        successListener.onSucces(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        errorListener.onError(error);
+                    }
+                })
+        {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+            @Override
+            public byte[] getBody() throws AuthFailureError {
+                try {
+                    //Creates instance of AutoRegister
+                    DataRegister jsonData = DataRegisterAux.datasWithRoot();
+
+                    //Serializes the AutoRegister object to json.
+                    String json = new GsonBuilder()
+                            .setPrettyPrinting()
+                            .create()
+                            .toJson(jsonData);
+
+                    //Prints the json
+                    Log.d("Smart Metering", json);
+
+                    return json.getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+
         request.add(stringRequest);
     }
 }

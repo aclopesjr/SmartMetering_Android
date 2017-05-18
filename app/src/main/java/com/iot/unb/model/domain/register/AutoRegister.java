@@ -1,6 +1,7 @@
 package com.iot.unb.model.domain.register;
 
 import com.google.gson.annotations.SerializedName;
+import com.iot.unb.model.service.Device;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,10 +101,10 @@ public class AutoRegister {
 
     public AutoRegister() {
         super();
-        setName("name of device");
-        setChipset("AMD 790FX");
-        setMac("5c:96:9d:77:9e:59");
-        setSerial("C02JM60EDTY3");
+        setName(Device.getDeviceName());
+        setChipset(Device.getChipset());
+        setMac(Device.getMacAdress());
+        setSerial(Device.getUniqueIdentifier());
         setProcessor("processor");
         setChannel("Ethernet");
 
